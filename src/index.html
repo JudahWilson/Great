@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App – Material</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "@material/web/": "https://esm.run/@material/web/"
+        }
+      }
+    </script>
+    <script type="module" src="./components/layout/side-nav.js"></script>
+    <script type="module" src="./components/layout/top-nav.js"></script>
+    <script type="module" src="./components/pages/dashboard-page.js"></script>
+    <script type="module" src="./components/pages/branches-page.js"></script>
+    <script type="module" src="./components/pages/staging-page.js"></script>
+    <script type="module" src="./components/pages/settings-page.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Override * reset so nav bars get inset (they live in document, not shadow DOM) */
+      app-side-nav {
+        padding: 24px;
+      }
+      app-top-nav {
+        padding: 0 24px;
+      }
+
+      body {
+        font-family: Roboto, sans-serif;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      .app {
+        display: flex;
+        flex: 1;
+        min-height: 100vh;
+      }
+
+      .app main {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .view {
+        flex: 1;
+        display: none;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .view.active {
+        display: flex;
+      }
+      .view-dashboard,
+      .view-staging,
+      .view-settings {
+        padding: 0;
+        overflow: auto;
+      }
+      .view-branches {
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <app-side-nav>
+        <a href="#" data-nav="dashboard" aria-current="page">Dashboard</a>
+        <a href="#" data-nav="branches">Branches</a>
+        <a href="#" data-nav="staging">Staging</a>
+        <a href="#" data-nav="settings">Settings</a>
+      </app-side-nav>
+
+      <main>
+        <app-top-nav>
+          <span slot="title">My App</span>
+        </app-top-nav>
+
+        <div class="main-content">
+          <div id="view-dashboard" class="view view-dashboard active">
+            <dashboard-page></dashboard-page>
+          </div>
+          <div id="view-branches" class="view view-branches">
+            <branches-page></branches-page>
+          </div>
+          <div id="view-staging" class="view view-staging">
+            <staging-page></staging-page>
+          </div>
+          <div id="view-settings" class="view view-settings">
+            <settings-page></settings-page>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module">
+      import "@material/web/all.js";
+      import { styles as typescaleStyles } from "@material/web/typography/md-typescale-styles.js";
+      document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
+
+      const views = {
+        dashboard: document.getElementById("view-dashboard"),
+        branches: document.getElementById("view-branches"),
+        staging: document.getElementById("view-staging"),
+        settings: document.getElementById("view-settings"),
+      };
+      const navLinks = document.querySelectorAll("app-side-nav a[data-nav]");
+
+      navLinks.forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const nav = link.getAttribute("data-nav");
+          if (!views[nav]) return;
+          navLinks.forEach((l) => l.removeAttribute("aria-current"));
+          link.setAttribute("aria-current", "page");
+          Object.keys(views).forEach((id) => {
+            views[id].classList.toggle("active", id === nav);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
