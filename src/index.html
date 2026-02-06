@@ -18,7 +18,7 @@
     <script type="module" src="./components/layout/side-nav.js"></script>
     <script type="module" src="./components/layout/top-nav.js"></script>
     <script type="module" src="./components/shared/page-wrapper.js"></script>
-    <script type="module" src="./components/pages/dashboard-page.js"></script>
+    <script type="module" src="./components/pages/home-page.js"></script>
     <script type="module" src="./components/pages/branches/index.js"></script>
     <script type="module" src="./components/pages/staging-page.js"></script>
     <script type="module" src="./components/pages/settings-page.js"></script>
@@ -73,7 +73,7 @@
       .view.active {
         display: flex;
       }
-      .view-dashboard,
+      .view-home,
       .view-staging,
       .view-settings {
         padding: 0;
@@ -87,7 +87,7 @@
   <body>
     <div class="app">
       <app-side-nav>
-        <a href="#" data-nav="dashboard" aria-current="page">Dashboard</a>
+        <a href="#" data-nav="home" aria-current="page">Home</a>
         <a href="#" data-nav="branches">Branches</a>
         <a href="#" data-nav="staging">Staging</a>
         <a href="#" data-nav="settings">Settings</a>
@@ -99,8 +99,8 @@
         </app-top-nav>
 
         <div class="main-content">
-          <div id="view-dashboard" class="view view-dashboard active">
-            <dashboard-page></dashboard-page>
+          <div id="view-home" class="view view-home active">
+            <home-page></home-page>
           </div>
           <div id="view-branches" class="view view-branches">
             <branches-page></branches-page>
@@ -121,7 +121,7 @@
       document.adoptedStyleSheets.push(typescaleStyles.styleSheet);
 
       const views = {
-        dashboard: document.getElementById("view-dashboard"),
+        home: document.getElementById("view-home"),
         branches: document.getElementById("view-branches"),
         staging: document.getElementById("view-staging"),
         settings: document.getElementById("view-settings"),
@@ -138,7 +138,20 @@
           Object.keys(views).forEach((id) => {
             views[id].classList.toggle("active", id === nav);
           });
+          document.dispatchEvent(
+            new CustomEvent("view-changed", { detail: { view: nav } })
+          );
         });
+      });
+
+      // Keep backend in sync with selected project so all git commands use that repo.
+      document.addEventListener("project-changed", (e) => {
+        const path = e.detail?.path ?? null;
+        if (window.__TAURI__?.core?.invoke) {
+          window.__TAURI__.core
+            .invoke("set_current_project", { path })
+            .catch(() => {});
+        }
       });
     </script>
   </body>

@@ -6,7 +6,6 @@ import "./branch-graph-interactive.js";
 import {
   getBranchTreeFromBackend,
   parseBranchTree,
-  SAMPLE_OUTPUT,
 } from "../../../gitparse.js";
 
 const template = document.createElement("template");
@@ -44,21 +43,37 @@ customElements.define(
     }
 
     connectedCallback() {
-      const graph = this.shadowRoot.querySelector("branch-graph-interactive");
-      if (!graph) return;
-      this._loadTreeIntoGraph(graph);
+      this._graph = this.shadowRoot.querySelector("branch-graph-interactive");
+      if (!this._graph) return;
+      this._onProjectOrViewChanged = () => this._loadTreeIntoGraph(this._graph);
+      document.addEventListener(
+        "project-changed",
+        this._onProjectOrViewChanged
+      );
+      document.addEventListener("view-changed", (e) => {
+        if (e.detail?.view === "branches") this._loadTreeIntoGraph(this._graph);
+      });
+      this._loadTreeIntoGraph(this._graph);
+    }
+
+    disconnectedCallback() {
+      document.removeEventListener(
+        "project-changed",
+        this._onProjectOrViewChanged
+      );
     }
 
     async _loadTreeIntoGraph(graph) {
+      if (!graph) return;
       let tree;
       if (window.__TAURI__?.core?.invoke) {
         try {
           tree = await getBranchTreeFromBackend();
         } catch (_) {
-          tree = parseBranchTree(SAMPLE_OUTPUT);
+          tree = parseBranchTree("");
         }
       } else {
-        tree = parseBranchTree(SAMPLE_OUTPUT);
+        tree = parseBranchTree("");
       }
       graph.setAttribute("data", JSON.stringify(tree));
     }

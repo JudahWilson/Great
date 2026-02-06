@@ -1,7 +1,15 @@
-# Tauri + Vanilla
+# Setup
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
+`npm install` then `npm run tauri dev`.
 
-## Recommended IDE Setup
+## Local data (SQLite)
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+The app uses **sqlx** in the Rust backend only. 
+
+The DB file is created in the app config dir (platform-specific). On startup, migrations in `src-tauri/migrations/` are applied. 
+
+Add new migrations there (e.g. `002_add_foo.sql`). 
+
+In commands, use `tauri::State<'_, SqlitePool>` to run queries. 
+
+Example: `db_ping` (invoke from the frontend to verify the DB is up).

@@ -12,14 +12,6 @@
  * Git itself behaves the same on Windows and Linux (same output). The parser accepts both LF and CRLF.
  * A script that runs these commands may need different shell escaping on Windows (e.g. ^ in cmd).
  */
-const SAMPLE_OUTPUT = `main
-develop main
-feature/auth develop
-feature/dashboard develop
-feature/api-v2 develop
-release/1.0 main
-hotfix/login-bug release/1.0
-experiment/poc main`;
 
 /**
  * Turn a branch name into the node shape { name, branch, children? }.
@@ -69,17 +61,15 @@ function parseBranchTree(raw) {
 }
 
 /**
- * Fetch branch tree output from Tauri backend (if running in Tauri), then parse to JSON.
- * @param {string} [repoPath] - Optional repo path; default is current dir on backend.
+ * Fetch branch tree output from Tauri backend for the currently selected project.
+ * Backend uses the project selected on the Home page; no path argument.
  * @returns {Promise<{ name: string, branch: string, children: Array }>} Root tree for branch-graph
  */
-export async function getBranchTreeFromBackend(repoPath) {
+export async function getBranchTreeFromBackend() {
   const invoke = window.__TAURI__?.core?.invoke;
   if (!invoke) throw new Error("Tauri invoke not available");
-  const raw = await invoke("get_branch_tree_output", {
-    repo_path: repoPath ?? null,
-  });
+  const raw = await invoke("get_branch_tree_output");
   return parseBranchTree(raw);
 }
 
-export { SAMPLE_OUTPUT, parseBranchTree };
+export { parseBranchTree };
